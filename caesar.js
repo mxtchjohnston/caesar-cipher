@@ -1,3 +1,22 @@
+const clamp = function(beginning, end, offset) {
+  const range = end - beginning;
+  return e => {
+    if (e === 32) return e; //special case for space
+
+    const offsetNum = (e + offset);
+    
+    if (offsetNum > end) {
+      return beginning + (offsetNum - end);
+    }
+
+    if (offsetNum < beginning) {
+      return end - (beginning - offsetNum);
+    }
+
+    return offsetNum;
+  };
+}
+
 const toCodePointArray = function(plaintext) {
   const newArray = [];
   for (let i = 0; i < plaintext.length; i++) {
@@ -6,28 +25,23 @@ const toCodePointArray = function(plaintext) {
   return newArray;
 }
 
-const clamp = function(beginning, end, offset) {
-  const range = end - beginning;
+const simpleClamp = function(offset) {
   return e => {
-    if (e === 32) return e; //special case for space
+    if (e === 32) return e;
 
-    const offsetNum = (e + offset);
-    if (offset + e > end) {
-      return beginning + (offsetNum % range);
-    }
+    const adjusted = e + offset;
 
-    if (offset + e < beginning) {
-      return end + (offset % range);
-    }
+    if (adjusted > 122) return 98 + (124 - adjusted);
+    if (adjusted < 97)  return 123 - (97 - adjusted);
 
-    return offsetNum;
-  };
-} 
+    return adjusted;
+  }
+}
 
 const encrypt = function(plaintext, key) {
   // IMPLEMENT ME
   const codePoints = toCodePointArray(plaintext);
-  const offsetCodePoints = codePoints.map(clamp(97, 122, key));
+  const offsetCodePoints = codePoints.map(simpleClamp(key));
   //console.log(offsetCodePoints);
   const encrypted = String.fromCodePoint(...offsetCodePoints);
   console.log(encrypted);
